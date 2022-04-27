@@ -1,0 +1,5 @@
+{% autoescape off %}
+    Hi {{ user.full_name }},
+    Please click on the link to registration
+    http://{{ domain }}{% url 'invite-register' uidb64=uid iiboa=iiboa token=token %}
+{% endautoescape %}
