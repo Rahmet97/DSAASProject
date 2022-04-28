@@ -47,6 +47,7 @@ class NoteView(generics.ListCreateAPIView):
 
 
 class NoteDestroyAPIView(APIView):
+    authentication_classes = []
     permission_classes = [IsAuthenticated, NotePermission]
 
     def get_object(self, pk):
