@@ -2,12 +2,13 @@ from dj_rest_auth.views import PasswordResetConfirmView
 from django.urls import path, include
 
 from auser.views import (
-    InviteUserEmailView, UserFirstLoginView, RegisterView, TestView
+    InviteUserEmailView, UserFirstLoginView, RegisterView, TestView, login, get_user
 )
 
 urlpatterns = [
-    path('auth/', include('dj_rest_auth.urls')),
-
+    # path('auth/', include('dj_rest_auth.urls')),
+    path('login/', login),
+    path('get-user/', get_user),
     path('auth/password/reset/confirm/<uidb64>/<token>/',
          PasswordResetConfirmView.as_view(), name='password_reset_confirm'),
     path('auth/first-login/', UserFirstLoginView.as_view(), name='user-first-login'),

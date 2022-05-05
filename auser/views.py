@@ -11,6 +11,21 @@ from rest_framework.views import APIView
 from auser.serializers import RegisterCustomSerializer, InviteUserEmailSerializer
 from auser.models import Worker, InviteUserEmail, RecommendUserEmail
 
+#---------------------------------------------------------------------------------------
+
+from django.contrib.auth.hashers import check_password, make_password
+from django.http import JsonResponse
+from rest_framework import generics
+from rest_framework.decorators import api_view, authentication_classes, permission_classes
+from rest_framework.response import Response
+from rest_framework_simplejwt.authentication import JWTAuthentication
+from django.contrib.auth.models import User
+from rest_framework_simplejwt.tokens import RefreshToken
+
+from .serializers import UserCustomDetailsSerializer #UsersSerializer, UserSerializer, NewsSerializer
+
+#---------------------------------------------------------------------------------------
+
 User = get_user_model()
 
 
@@ -106,3 +121,43 @@ class UserFirstLoginView(APIView):
 
 class TestView(TemplateView):
     template_name = 'user/invite_email_reg.html'
+
+
+@api_view(['post'])
+@authentication_classes([])
+@permission_classes([])
+def login(request):
+    try:
+        email = request.data.get('email')
+        password = request.data.get('password')
+        us = User.objects.get(email=email)
+        if check_password(password, us.password):
+            token = RefreshToken.for_user(us)
+            tk = {
+                "refresh": str(token),
+                "access": str(token.access_token)
+            }
+            data = {
+                "success": True,
+                "token": tk
+            }
+        else:
+            data = {
+                "success": False,
+                "message": "Email yoki parol xato!!!"
+            }
+            return Response(data, status=405)
+    except Exception as e:
+        data = {
+            "success": False,
+            "message": f"{e}"
+        }
+        return Response(data, status=405)
+    return Response(data, status=200)
+
+
+@api_view(['get'])
+@authentication_classes([JWTAuthentication])
+def get_user(request):
+    user = UserCustomDetailsSerializer(request.user)
+    return Response(user.data)

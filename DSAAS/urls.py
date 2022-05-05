@@ -8,8 +8,9 @@ from .yasg import urlpatterns as doc_urls
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('api/user/', include("auser.urls")),
+    path('api/user/auth/', include("auser.urls")),
     path('task/', include('task_app.urls')),
+    path('telegram/', include("telegram.urls")),
 ]
 
 urlpatterns += doc_urls
