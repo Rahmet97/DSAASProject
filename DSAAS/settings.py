@@ -25,6 +25,8 @@ SECRET_KEY = 'django-insecure-1z40b0tq+)bxp5^s0w7+0)9d)km(@f9@r-12zjr#y0wf&f=7zl
 DEBUG = True
 
 ALLOWED_HOSTS = ['*']
+CORS_ORIGIN_ALLOW_ALL = True
+CORS_ALLOW_CREDENTIALS = True
 
 AUTH_USER_MODEL = "auser.User"
 
@@ -47,7 +49,7 @@ THIRD_PARTY_APPS = [
     'rest_framework',
     'rest_framework.authtoken',
     # 'rest_framework_simplejwt',
-    'dj_rest_auth',
+    # 'dj_rest_auth',
 
     # 'allauth',
     # 'allauth.account',
@@ -72,22 +74,6 @@ REST_FRAMEWORK = {
         'rest_framework.permissions.AllowAny',
     )
 }
-REST_AUTH_SERIALIZERS = {
-    'LOGIN_SERIALIZER': 'auser.serializers.LoginCustomSerializer',
-    'USER_DETAILS_SERIALIZER': 'auser.serializers.UserCustomDetailsSerializer',
-}
-
-# dj_rest_auth settings
-ACCOUNT_USERNAME_REQUIRED = False
-ACCOUNT_USER_MODEL_USERNAME_FIELD = None
-
-ACCOUNT_AUTHENTICATION_METHOD = "email"
-ACCOUNT_EMAIL_REQUIRED = True
-ACCOUNT_UNIQUE_EMAIL = True
-
-REST_USE_JWT = True
-JWT_AUTH_COOKIE = 'my-app-auth'
-JWT_AUTH_REFRESH_COOKIE = 'my-refresh-token'
 
 # SIMPLE_JWT settings
 SIMPLE_JWT = {
@@ -120,6 +106,16 @@ SIMPLE_JWT = {
     # 'SLIDING_TOKEN_REFRESH_EXP_CLAIM': 'refresh_exp',
     # 'SLIDING_TOKEN_LIFETIME': timedelta(minutes=5),
     # 'SLIDING_TOKEN_REFRESH_LIFETIME': timedelta(days=1),
+}
+
+SWAGGER_SETTINGS = {
+    'SECURITY_DEFINITIONS': {
+        'Bearer': {
+            'type': 'apiKey',
+            'in': 'header',
+            'name': 'Authorization'
+        }
+    }
 }
 
 MIDDLEWARE = [

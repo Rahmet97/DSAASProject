@@ -1,10 +1,7 @@
-from allauth.account.adapter import get_adapter
 from django.contrib.auth import get_user_model
 from rest_framework import serializers
 from django.core.exceptions import ValidationError as DjangoValidationError
 from django.utils.translation import gettext_lazy as _
-
-from dj_rest_auth.serializers import LoginSerializer, UserDetailsSerializer
 
 from auser.models import UserRole, InviteUserEmail
 
@@ -37,8 +34,8 @@ class RegisterCustomSerializer(serializers.ModelSerializer):
                 _('A user is already registered with this e-mail address.'), )
         return email
 
-    def validate_password1(self, password):
-        return get_adapter().clean_password(password)
+    # def validate_password1(self, password):
+    #     return get_adapter().clean_password(password)
 
     def validate(self, data):
         if UserModel.objects.filter(phone_number=data['phone_number']).exists():
@@ -72,14 +69,13 @@ class RegisterCustomSerializer(serializers.ModelSerializer):
         return user
 
 
-class LoginCustomSerializer(LoginSerializer):
-    username = None
+class LoginSerializer(serializers.Serializer):
     email = serializers.EmailField(required=True)
     password = serializers.CharField(style={'input_type': 'password'})
 
 
 # User Details Serializer
-class UserCustomDetailsSerializer(UserDetailsSerializer):
+class UserCustomDetailsSerializer(serializers.ModelSerializer):
     class Meta:
         model = UserModel
         extra_fields = []

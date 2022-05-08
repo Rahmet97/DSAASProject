@@ -2,38 +2,21 @@ from django.contrib.auth import get_user_model
 from django.utils.encoding import force_str
 from django.utils.http import urlsafe_base64_decode
 from django.views.generic import TemplateView
-from rest_framework import status, permissions
-from rest_framework.generics import CreateAPIView, UpdateAPIView, get_object_or_404
-from rest_framework.permissions import BasePermission
-from rest_framework.response import Response
-from rest_framework.views import APIView
+from drf_yasg.utils import swagger_auto_schema
+from rest_framework import status, permissions, response, views
+from rest_framework.generics import CreateAPIView, get_object_or_404, GenericAPIView
+from rest_framework.parsers import MultiPartParser
+from rest_framework_simplejwt import exceptions, authentication, tokens
 
-from auser.serializers import RegisterCustomSerializer, InviteUserEmailSerializer
+from auser.serializers import (
+    RegisterCustomSerializer, InviteUserEmailSerializer, UserCustomDetailsSerializer,
+    LoginSerializer
+)
 from auser.models import Worker, InviteUserEmail, RecommendUserEmail
-
-#---------------------------------------------------------------------------------------
-
-from django.contrib.auth.hashers import check_password, make_password
-from django.http import JsonResponse
-from rest_framework import generics
-from rest_framework.decorators import api_view, authentication_classes, permission_classes
-from rest_framework.response import Response
-from rest_framework_simplejwt.authentication import JWTAuthentication
-from django.contrib.auth.models import User
-from rest_framework_simplejwt.tokens import RefreshToken
-
-from .serializers import UserCustomDetailsSerializer #UsersSerializer, UserSerializer, NewsSerializer
-
-#---------------------------------------------------------------------------------------
+from auser.u_permissions import InviteUserEmailPermission
+from auser.u_utils import check_token
 
 User = get_user_model()
-
-
-class InviteUserEmailPermission(BasePermission):
-    def has_permission(self, request, view):
-        return bool(
-            request.user and request.user.is_authenticated and request.user.is_company_admin
-        )
 
 
 # Invite User Email View
@@ -48,15 +31,6 @@ class InviteUserEmailView(CreateAPIView):
         else:
             boss = req_user
         serializer.save(whose_employee_worker=boss)
-
-
-# Auth register view
-def check_token(user, token):
-    if (user.token is None) or (token is None):
-        return False
-    if user.token == token:
-        return True
-    return False
 
 
 # Register view
@@ -79,14 +53,15 @@ class RegisterView(CreateAPIView):
             return self.create(request, *args, **kwargs)
 
         else:
-            return Response({"message": "Invitation link is invalid!"}, status=status.HTTP_400_BAD_REQUEST)
+            return response.Response({"message": "Invitation link is invalid!"}, status=status.HTTP_400_BAD_REQUEST)
 
     def create(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         self.perform_create(serializer)
         headers = self.get_success_headers(serializer.data)
-        return Response({"message": "you are successfully registered"}, status=status.HTTP_201_CREATED, headers=headers)
+        return response.Response({"message": "you are successfully registered"},
+                                 status=status.HTTP_201_CREATED, headers=headers)
 
     def perform_create(self, serializer):
         employee = serializer.save()
@@ -107,7 +82,7 @@ class RegisterView(CreateAPIView):
 
 
 # User First Login view
-class UserFirstLoginView(APIView):
+class UserFirstLoginView(views.APIView):
     permission_classes = (permissions.IsAuthenticated,)
 
     def post(self, request, *args, **kwargs):
@@ -115,49 +90,95 @@ class UserFirstLoginView(APIView):
             user = get_object_or_404(User, id=request.user.id)
             user.is_first_login = False
             user.save()
-            return Response(data={"message": "successfully changed"}, status=status.HTTP_200_OK)
-        return Response(data={"message": "unsuccessfully changed"}, status=status.HTTP_400_BAD_REQUEST)
+            return response.Response(data={"message": "successfully changed"}, status=status.HTTP_200_OK)
+        return response.Response(data={"message": "unsuccessfully changed"}, status=status.HTTP_400_BAD_REQUEST)
 
 
 class TestView(TemplateView):
     template_name = 'user/invite_email_reg.html'
 
 
-@api_view(['post'])
-@authentication_classes([])
-@permission_classes([])
-def login(request):
-    try:
-        email = request.data.get('email')
-        password = request.data.get('password')
-        us = User.objects.get(email=email)
-        if check_password(password, us.password):
-            token = RefreshToken.for_user(us)
-            tk = {
-                "refresh": str(token),
-                "access": str(token.access_token)
-            }
-            data = {
-                "success": True,
-                "token": tk
-            }
-        else:
-            data = {
-                "success": False,
-                "message": "Email yoki parol xato!!!"
-            }
-            return Response(data, status=405)
-    except Exception as e:
-        data = {
-            "success": False,
-            "message": f"{e}"
+# @api_view(['post'])
+# @authentication_classes([])
+# @permission_classes([])
+# def login(request):
+#     try:
+#         email = request.data.get('email')
+#         password = request.data.get('password')
+#         us = User.objects.get(email=email)
+#         if check_password(password, us.password):
+#             token = RefreshToken.for_user(us)
+#             tk = {
+#                 "refresh": str(token),
+#                 "access": str(token.access_token)
+#             }
+#             data = {
+#                 "success": True,
+#                 "token": tk
+#             }
+#         else:
+#             data = {
+#                 "success": False,
+#                 "message": "Email yoki parol xato!!!"
+#             }
+#             return Response(data, status=405)
+#     except Exception as e:
+#         data = {
+#             "success": False,
+#             "message": f"{e}"
+#         }
+#         return Response(data, status=405)
+#     return Response(data, status=200)
+
+
+class LoginView(GenericAPIView):
+    serializer_class = LoginSerializer
+    permission_classes = [permissions.AllowAny, ]
+
+    # parser_classes = (MultiPartParser,)
+
+    @swagger_auto_schema(operation_summary="Login tizimga kirish")
+    def post(self, request):
+        serializer = self.get_serializer(data=request.data)
+
+        serializer.is_valid(raise_exception=True)
+        email = serializer.data.get("email")
+        password = serializer.data.get("password")
+
+        user = User.objects.filter(email=email).first()
+        if user is None:
+            raise exceptions.AuthenticationFailed('User not found!')
+        if not user.check_password(password):
+            raise exceptions.AuthenticationFailed('Incorrect password!')
+
+        token = tokens.RefreshToken.for_user(user)
+        tk = {
+            "access": str(token.access_token),
+            "refresh": str(token),
         }
-        return Response(data, status=405)
-    return Response(data, status=200)
+        return response.Response(data=tk, status=status.HTTP_200_OK)
 
 
-@api_view(['get'])
-@authentication_classes([JWTAuthentication])
-def get_user(request):
-    user = UserCustomDetailsSerializer(request.user)
-    return Response(user.data)
+class UserView(GenericAPIView):
+    serializer_class = UserCustomDetailsSerializer
+    authentication_classes = [authentication.JWTAuthentication]
+    permission_classes = [permissions.IsAuthenticated]
+
+    # parser_classes = (MultiPartParser,)
+
+    @swagger_auto_schema(operation_summary="Foydalanuvchi haqidagi malumotlar")
+    def get(self, request):
+        user = get_object_or_404(User, email=request.user.email, pk=request.user.pk)
+        serializer = self.get_serializer(user)
+        return response.Response(data=serializer.data)
+
+    @swagger_auto_schema(operation_summary="Foydalanuvchi ma`lumotlarini yangilash")
+    def put(self, request, *args, **kwargs):
+        """
+        Foydalanuvchi ma`lumotlarini yangilash
+        """
+        user, data = request.user, request.data
+        serializer = self.get_serializer(user, data=data, partial=False)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return response.Response(serializer.data)
