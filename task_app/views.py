@@ -4,6 +4,7 @@ from rest_framework.permissions import BasePermission, IsAuthenticated
 from task_app.models import Task, Note
 from rest_framework.views import APIView
 from django.http import Http404
+from rest_framework_simplejwt import exceptions, authentication, tokens
 
 
 class NotePermission(BasePermission):
@@ -31,6 +32,7 @@ class TaskPermission(BasePermission):
 class TaskView(viewsets.ModelViewSet):
     queryset = Task.objects.all()
     serializer_class = TaskSerializer
+    authentication_classes = [authentication.JWTAuthentication]
     permission_classes = [IsAuthenticated, TaskPermission]
 
     def perform_create(self, serializer):
@@ -40,6 +42,7 @@ class TaskView(viewsets.ModelViewSet):
 class NoteView(generics.ListCreateAPIView):
     queryset = Note.objects.all()
     serializer_class = NoteSerializer
+    authentication_classes = [authentication.JWTAuthentication]
     permission_classes = [IsAuthenticated, NotePermission]
 
     def perform_create(self, serializer):
@@ -47,7 +50,7 @@ class NoteView(generics.ListCreateAPIView):
 
 
 class NoteDestroyAPIView(APIView):
-    authentication_classes = []
+    authentication_classes = [authentication.JWTAuthentication]
     permission_classes = [IsAuthenticated, NotePermission]
 
     def get_object(self, pk):

@@ -133,7 +133,7 @@ class TestView(TemplateView):
 
 class LoginView(GenericAPIView):
     serializer_class = LoginSerializer
-    permission_classes = [permissions.AllowAny, ]
+    # permission_classes = [permissions.AllowAny, ]
 
     # parser_classes = (MultiPartParser,)
 

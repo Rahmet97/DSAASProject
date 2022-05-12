@@ -1,5 +1,6 @@
 # from dj_rest_auth.views import PasswordResetConfirmView
 from django.urls import path
+from django.views.decorators.csrf import csrf_exempt
 
 from auser.views import (
     InviteUserEmailView, UserFirstLoginView, RegisterView, TestView, LoginView, UserView
