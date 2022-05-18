@@ -1,6 +1,9 @@
 import binascii
+import datetime
 import os
 
+from django.conf import settings
+from django.core.cache import cache
 from django.db import models
 from django.contrib.auth.models import AbstractBaseUser
 from django.utils.translation import gettext_lazy as _
@@ -43,6 +46,20 @@ class User(AbstractBaseUser):
         # Simplest possible answer: Yes, always
         return True
 
+    def last_seen(self):
+        return cache.get('seen_%s' % self.email)
+
+    @property
+    def is_online(self):
+        if self.last_seen():
+            now = datetime.datetime.now()
+            if now > self.last_seen() + datetime.timedelta(seconds=settings.USER_ONLINE_TIMEOUT):
+                return False
+            else:
+                return True
+        else:
+            return False
+
     @property
     def is_staff(self):
         "Is the user a member of staff?"
@@ -51,8 +68,8 @@ class User(AbstractBaseUser):
 
 
 class Worker(models.Model):
-    whose_employee = models.ForeignKey(to=User, on_delete=models.CASCADE, related_name="whose_employee")
-    employee = models.ForeignKey(to=User, on_delete=models.CASCADE, related_name="employee")
+    whose_employee = models.ForeignKey(to=User, on_delete=models.CASCADE, related_name="whose_employee_related")
+    employee = models.ForeignKey(to=User, on_delete=models.CASCADE, related_name="employee_related")
 
 
 class RecommendUserEmail(models.Model):

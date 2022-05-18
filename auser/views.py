@@ -1,6 +1,8 @@
 from django.contrib.auth import get_user_model
+from django.utils.decorators import method_decorator
 from django.utils.encoding import force_str
 from django.utils.http import urlsafe_base64_decode
+from django.views.decorators.csrf import csrf_exempt
 from django.views.generic import TemplateView
 from drf_yasg.utils import swagger_auto_schema
 from rest_framework import status, permissions, response, views
@@ -10,7 +12,7 @@ from rest_framework_simplejwt import exceptions, authentication, tokens
 
 from auser.serializers import (
     RegisterCustomSerializer, InviteUserEmailSerializer, UserCustomDetailsSerializer,
-    LoginSerializer
+    LoginSerializer, GetOnlineUsersSerializer
 )
 from auser.models import Worker, InviteUserEmail, RecommendUserEmail
 from auser.u_permissions import InviteUserEmailPermission
@@ -130,10 +132,10 @@ class TestView(TemplateView):
 #         return Response(data, status=405)
 #     return Response(data, status=200)
 
-
+@method_decorator(csrf_exempt, name='dispatch')
 class LoginView(GenericAPIView):
     serializer_class = LoginSerializer
-    # permission_classes = [permissions.AllowAny, ]
+    permission_classes = [permissions.AllowAny, ]
 
     # parser_classes = (MultiPartParser,)
 
@@ -182,3 +184,36 @@ class UserView(GenericAPIView):
         serializer.is_valid(raise_exception=True)
         serializer.save()
         return response.Response(serializer.data)
+
+
+# Get Online Users View
+class GetOnlineUsersView(views.APIView):
+    authentication_classes = [authentication.JWTAuthentication]
+    permission_classes = [permissions.IsAuthenticated]
+
+    @swagger_auto_schema(operation_summary="online users count and lists")
+    def get(self, request):
+        online_users_count = 0
+
+        if Worker.objects.filter(employee=request.user).exists():  # request user is employee
+            boss = request.user.employee_related.get().whose_employee
+        else:  # request user is boss
+            boss = request.user
+
+        if boss.is_online:
+            online_users_count += 1
+
+        obj = Worker.objects.filter(whose_employee=boss)
+
+        for x in obj:
+            if x.employee.is_online:
+                online_users_count += 1
+
+        if obj:
+            serializers = GetOnlineUsersSerializer(obj, many=True)
+            data = {
+                "online_users": serializers.data,
+                "online_users_count": online_users_count
+            }
+            return response.Response(data=data, status=status.HTTP_200_OK)
+        return response.Response(data={"message": "HTTP 204 NO CONTENT"}, status=status.HTTP_204_NO_CONTENT)

@@ -1,20 +1,21 @@
 # from dj_rest_auth.views import PasswordResetConfirmView
 from django.urls import path
-from django.views.decorators.csrf import csrf_exempt
 
 from auser.views import (
-    InviteUserEmailView, UserFirstLoginView, RegisterView, TestView, LoginView, UserView
+    InviteUserEmailView, UserFirstLoginView, RegisterView, TestView,
+    LoginView, UserView, GetOnlineUsersView
 )
 
 urlpatterns = [
-    path('user/', UserView.as_view(), name='user'),
-    path('login/', LoginView.as_view(), name="login"),
+    path('auth/user/', UserView.as_view(), name='user'),
+    path('auth/login/', LoginView.as_view(), name="login"),
     # path('auth/password/reset/confirm/<uidb64>/<token>/',
     #      PasswordResetConfirmView.as_view(), name='password_reset_confirm'),
-    path('auth/first-login/', UserFirstLoginView.as_view(), name='user-first-login'),
+    path('auth/auth/first-login/', UserFirstLoginView.as_view(), name='user-first-login'),
 
-    path('invite/registration/<uidb64>/<iiboa>/<token>/', RegisterView.as_view(), name='invite-register'),
-    path('invite/', InviteUserEmailView.as_view(), name='invite_user_email'),
-    path('hello/', TestView.as_view(), name='hello'),
+    path('auth/invite/registration/<uidb64>/<iiboa>/<token>/', RegisterView.as_view(), name='invite-register'),
+    path('auth/invite/', InviteUserEmailView.as_view(), name='get-online-users'),
+    path('get-online-users/', GetOnlineUsersView.as_view(), name='hello'),
+    path('auth/hello/', TestView.as_view(), name='hello'),
 
 ]
