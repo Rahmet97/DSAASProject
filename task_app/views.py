@@ -1,10 +1,13 @@
-from .serializer import TaskSerializer, NoteSerializer
+from webbrowser import GenericBrowser
+from django.shortcuts import get_object_or_404
 from rest_framework import viewsets, generics, response, status
 from rest_framework.permissions import BasePermission, IsAuthenticated
 from task_app.models import Task, Note
 from rest_framework.views import APIView
 from django.http import Http404
 from rest_framework_simplejwt import exceptions, authentication, tokens
+
+from .serializer import TaskSerializer, NoteSerializer, TaskStatusSerializer
 
 
 class NotePermission(BasePermission):
@@ -37,6 +40,19 @@ class TaskView(viewsets.ModelViewSet):
 
     def perform_create(self, serializer):
         serializer.save(created_from=self.request.user)
+
+class ChangeStatusTaskView(generics.GenericAPIView):
+    serializer_class=TaskStatusSerializer
+    authentication_classes = [authentication.JWTAuthentication]
+    permission_classes = [IsAuthenticated, TaskPermission]
+    
+    def put(self, request, id):
+        task=get_object_or_404(Task, pk=id)
+        serializers=self.get_serializer(task)
+        serializers.is_valid(raise_exception=True)
+        serializers.save()
+        return response.Response(status=200)
+        
 
 
 class NoteView(generics.ListCreateAPIView):
