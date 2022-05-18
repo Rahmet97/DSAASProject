@@ -1,9 +1,9 @@
 from django.contrib.auth import get_user_model
-from rest_framework import serializers
+from rest_framework import serializers, fields
 from django.core.exceptions import ValidationError as DjangoValidationError
 from django.utils.translation import gettext_lazy as _
 
-from auser.models import UserRole, InviteUserEmail
+from auser.models import UserRole, InviteUserEmail, Worker
 
 UserModel = get_user_model()
 
@@ -93,3 +93,20 @@ class UserCustomDetailsSerializer(serializers.ModelSerializer):
 
         fields = ('pk', *extra_fields)
         read_only_fields = ('email',)
+
+
+class OnlineUsersSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = UserModel
+        fields = ['pk', 'email', 'is_online']
+
+
+class GetOnlineUsersSerializer(serializers.ModelSerializer):
+    user = fields.SerializerMethodField()
+
+    class Meta:
+        model = Worker
+        fields = ['user']
+
+    def get_user(self, obj):
+        return OnlineUsersSerializer(obj.employee).data
