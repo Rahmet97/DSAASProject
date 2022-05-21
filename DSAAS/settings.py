@@ -62,7 +62,8 @@ LOCAL_APPS = [
     'task_app',
     'urlShort',
     'telegram',
-    'instagram'
+    'instagram',
+    'ads_list'
 ]
 
 INSTALLED_APPS = INSTALLED_APPS + LOCAL_APPS + THIRD_PARTY_APPS

@@ -37,21 +37,24 @@ class TaskView(viewsets.ModelViewSet):
     serializer_class = TaskSerializer
     authentication_classes = [authentication.JWTAuthentication]
     permission_classes = [IsAuthenticated, TaskPermission]
-
+    
     def perform_create(self, serializer):
         serializer.save(created_from=self.request.user)
 
 class ChangeStatusTaskView(generics.GenericAPIView):
     serializer_class=TaskStatusSerializer
+    queryset = Task.objects.all()
     authentication_classes = [authentication.JWTAuthentication]
     permission_classes = [IsAuthenticated, TaskPermission]
     
     def put(self, request, id):
+        
         task=get_object_or_404(Task, pk=id)
         serializers=self.get_serializer(task)
         serializers.is_valid(raise_exception=True)
         serializers.save()
         return response.Response(status=200)
+
         
 
 
