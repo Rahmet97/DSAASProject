@@ -15,12 +15,11 @@ class UrlShortView(generics.GenericAPIView):
 
     def post(self, request):
         serializer = self.get_serializer(data=request.data)
-        req_user = self.request.user
 
-        if Worker.objects.filter(employee=req_user).exists():
-            boss = req_user.employee.whose_employee
+        if Worker.objects.filter(employee=request.user).exists():
+            boss = request.user.employee_related.get().whose_employee
         else:
-            boss = req_user
+            boss = request.user
 
         serializer.save(director_user=boss)
 

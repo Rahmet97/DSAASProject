@@ -3,7 +3,7 @@ from django.urls import path
 
 from auser.views import (
     InviteUserEmailView, UserFirstLoginView, RegisterView, TestView,
-    LoginView, UserView, GetOnlineUsersView
+    LoginView, UserView, GetOnlineUsersView, DashboardPartTwoView
 )
 
 urlpatterns = [
@@ -14,8 +14,9 @@ urlpatterns = [
     path('auth/auth/first-login/', UserFirstLoginView.as_view(), name='user-first-login'),
 
     path('auth/invite/registration/<uidb64>/<iiboa>/<token>/', RegisterView.as_view(), name='invite-register'),
-    path('auth/invite/', InviteUserEmailView.as_view(), name='get-online-users'),
-    path('get-online-users/', GetOnlineUsersView.as_view(), name='hello'),
+    path('auth/invite/', InviteUserEmailView.as_view(), name='invite-user'),
+    path('get-online-users/', GetOnlineUsersView.as_view(), name='get-online-users'),
+    path('dash/', DashboardPartTwoView.as_view(), name='dash'),
     path('auth/hello/', TestView.as_view(), name='hello'),
 
 ]

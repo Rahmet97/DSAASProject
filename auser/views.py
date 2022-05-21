@@ -12,11 +12,12 @@ from rest_framework_simplejwt import exceptions, authentication, tokens
 
 from auser.serializers import (
     RegisterCustomSerializer, InviteUserEmailSerializer, UserCustomDetailsSerializer,
-    LoginSerializer, GetOnlineUsersSerializer
+    LoginSerializer, OnlineUsersSerializer, DashboardPartSerializer
 )
-from auser.models import Worker, InviteUserEmail, RecommendUserEmail
+from auser.models import Worker, InviteUserEmail, RecommendUserEmail, UserRole
 from auser.u_permissions import InviteUserEmailPermission
 from auser.u_utils import check_token
+from task_app.models import Task
 
 User = get_user_model()
 
@@ -28,9 +29,9 @@ class InviteUserEmailView(CreateAPIView):
 
     def perform_create(self, serializer):
         req_user = self.request.user
-        if Worker.objects.filter(employee=req_user).exists():
-            boss = req_user.employee.whose_employee
-        else:
+        if Worker.objects.filter(employee=req_user).exists():  # request user is employee
+            boss = req_user.employee_related.get().whose_employee
+        else:  # request user is boss
             boss = req_user
         serializer.save(whose_employee_worker=boss)
 
@@ -194,6 +195,8 @@ class GetOnlineUsersView(views.APIView):
     @swagger_auto_schema(operation_summary="online users count and lists")
     def get(self, request):
         online_users_count = 0
+        order_by = request.query_params.get('order', None)
+        print(order_by)
 
         if Worker.objects.filter(employee=request.user).exists():  # request user is employee
             boss = request.user.employee_related.get().whose_employee
@@ -203,17 +206,54 @@ class GetOnlineUsersView(views.APIView):
         if boss.is_online:
             online_users_count += 1
 
-        obj = Worker.objects.filter(whose_employee=boss)
+        # obj = Worker.objects.filter(whose_employee=boss)
+        obj = User.objects.filter(employee_related__whose_employee=boss)
+
+        if order_by:
+            obj = obj.order_by(order_by)
 
         for x in obj:
-            if x.employee.is_online:
+            # if x.employee.is_online:
+            if x.is_online:
                 online_users_count += 1
 
         if obj:
-            serializers = GetOnlineUsersSerializer(obj, many=True)
+            # serializers = GetOnlineUsersSerializer(obj, many=True)
+            serializers = OnlineUsersSerializer(obj, many=True)
             data = {
                 "online_users": serializers.data,
                 "online_users_count": online_users_count
             }
             return response.Response(data=data, status=status.HTTP_200_OK)
         return response.Response(data={"message": "HTTP 204 NO CONTENT"}, status=status.HTTP_204_NO_CONTENT)
+
+
+class DashboardPartTwoView(GenericAPIView):
+    authentication_classes = [authentication.JWTAuthentication]
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get(self, request):
+
+        if Worker.objects.filter(employee=request.user).exists():  # request user is employee
+            boss = request.user.employee_related.get().whose_employee
+        else:  # request user is boss
+            boss = request.user
+
+        users = User.objects.filter(employee_related__whose_employee=boss)
+        tasks = Task.objects.filter(created_from__employee_related__whose_employee=boss)
+
+        roles = [i.type for i in UserRole.objects.all()]
+        context = {i: 0 for i in roles}
+        for user in users:
+            if user.type.type in roles:
+                context[user.type.type] += 1
+        serializers = DashboardPartSerializer(tasks, many=True)
+        data = {
+            "employee_roles": context,
+            "employee_total": users.count(),
+            "project_tracked": {
+                "projects_total": tasks.count(),
+                "project_tracked": serializers.data,
+            }
+        }
+        return response.Response(data, status=200)

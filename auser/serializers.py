@@ -3,7 +3,8 @@ from rest_framework import serializers, fields
 from django.core.exceptions import ValidationError as DjangoValidationError
 from django.utils.translation import gettext_lazy as _
 
-from auser.models import UserRole, InviteUserEmail, Worker
+from auser.models import UserRole, InviteUserEmail
+from task_app.models import Task
 
 UserModel = get_user_model()
 
@@ -96,17 +97,26 @@ class UserCustomDetailsSerializer(serializers.ModelSerializer):
 
 
 class OnlineUsersSerializer(serializers.ModelSerializer):
+    projects = fields.SerializerMethodField()
+    user_role = fields.SerializerMethodField()
+
     class Meta:
         model = UserModel
-        fields = ['pk', 'email', 'is_online']
+        fields = ['pk', 'full_name', 'user_role', 'email', 'projects', 'is_online', ]
+
+    def get_projects(self, obj):
+        return obj.task_pinned_to.all().count()
+
+    def get_user_role(self, obj):
+        return UserRoleSerializer(obj.type).data
 
 
-class GetOnlineUsersSerializer(serializers.ModelSerializer):
-    user = fields.SerializerMethodField()
-
+class DashboardPartSerializer(serializers.ModelSerializer):
     class Meta:
-        model = Worker
-        fields = ['user']
+        model = Task
+        fields = ['id', 'created_at', 'deadline', 'status', 'pinned_to']
 
-    def get_user(self, obj):
-        return OnlineUsersSerializer(obj.employee).data
+    # def to_representation(self, instance):
+    #     representation = super().to_representation(instance)
+    #
+    #     return representation
