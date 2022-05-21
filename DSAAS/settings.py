@@ -62,7 +62,8 @@ LOCAL_APPS = [
     'task_app',
     'urlShort',
     'telegram',
-    'instagram'
+    'instagram',
+    'ads_list'
 ]
 
 INSTALLED_APPS = INSTALLED_APPS + LOCAL_APPS + THIRD_PARTY_APPS
@@ -220,7 +221,7 @@ AUTH_PASSWORD_VALIDATORS = [
 
 LANGUAGE_CODE = 'en-us'
 
-TIME_ZONE = 'UTC'
+TIME_ZONE = 'Asia/Tashkent'
 
 USE_I18N = True
 
@@ -254,3 +255,6 @@ CELERY_ACCEPT_CONTENT = ['application/json']
 CELERY_RESULT_SERIALIZER = 'json'
 CELERY_TASK_SERIALIZER = 'json'
 CELERY_BEAT_SCHEDULER = 'django_celery_beat.schedulers:DatabaseScheduler'
+
+BOT_TOKEN = "5269482912:AAHYYrQ5nR_yrKp9ay8PAfulTatXSuGCh6A"
+

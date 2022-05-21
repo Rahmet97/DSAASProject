@@ -4,7 +4,7 @@ from task_app.views import TaskView, NoteView, NoteDestroyAPIView, ChangeStatusT
 
 router = routers.DefaultRouter()
 router.register(r"task", TaskView, basename="task")
-# router.register(r"note", NoteView, basename="note")
+
 
 urlpatterns = [
     path('note/', NoteView.as_view(), name='note'),

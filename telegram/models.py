@@ -7,16 +7,15 @@ from auser.models import User
 
 
 class TGChannel(models.Model):
-    channel_link = models.CharField(max_length=100, blank=True)
-    group_link = models.CharField(max_length=100, blank=True)
+    link = models.URLField()
     user = models.ForeignKey(User, on_delete=models.CASCADE)
 
     class Meta:
-        verbose_name = "Telegram Channel and/or Group"
+        verbose_name = "Telegram Channel or Group"
         verbose_name_plural = "Telegram Channels and Groups"
 
     def __str__(self):
-        return self.user.first_name + self.user.last_name
+        return self.user.first_name + " " + self.user.last_name
 
 
 def slugify_upload(instance, filename):
