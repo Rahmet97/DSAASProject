@@ -66,6 +66,10 @@ class User(AbstractBaseUser):
         # Simplest possible answer: All admins are staff
         return self.is_admin
 
+    @property
+    def full_name(self):
+        return f"{self.first_name} {self.last_name}"
+
 
 class Worker(models.Model):
     whose_employee = models.ForeignKey(to=User, on_delete=models.CASCADE, related_name="whose_employee_related")

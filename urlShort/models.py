@@ -1,5 +1,8 @@
+from django.contrib.auth import get_user_model
 from django.contrib.sites.models import Site
 from django.db import models
+
+User = get_user_model()
 
 
 class UrlClicker(models.Model):
@@ -10,6 +13,8 @@ class UrlClicker(models.Model):
 
 
 class UrlShort(models.Model):
+    director_user = models.ForeignKey(to=User, on_delete=models.CASCADE)
+    name = models.CharField(max_length=250)
     original_url = models.URLField()
     slug = models.URLField(unique=True)
     clickers = models.ManyToManyField(to=UrlClicker)

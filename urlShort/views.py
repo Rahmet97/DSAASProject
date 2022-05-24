@@ -4,6 +4,7 @@ import string
 from django.shortcuts import redirect
 from rest_framework import response, status, generics
 
+from auser.models import Worker
 from .utils import get_client_ip
 from .models import UrlShort, UrlClicker
 from .serializers import UrlSerializer
@@ -14,6 +15,13 @@ class UrlShortView(generics.GenericAPIView):
 
     def post(self, request):
         serializer = self.get_serializer(data=request.data)
+
+        if Worker.objects.filter(employee=request.user).exists():
+            boss = request.user.employee_related.get().whose_employee
+        else:
+            boss = request.user
+
+        serializer.save(director_user=boss)
 
         serializer.is_valid(raise_exception=True)
         slug = ''.join(random.choice(string.ascii_letters) for _ in range(10))
