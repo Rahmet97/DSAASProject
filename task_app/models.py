@@ -5,7 +5,7 @@ User = get_user_model()
 
 
 class Task(models.Model):
-    status = {
+    status = (
         ('TO_DO', 'TO_DO'),
         ('DOING', 'DOING'),
         ('TESTING', 'TESTING'),
@@ -13,7 +13,7 @@ class Task(models.Model):
         ('DOING', 'DOING'),
         ('DONE', 'DONE'),
         ('HISTORY', 'HISTORY')
-    }
+    )
     description = models.TextField()
     deadline = models.DateTimeField()
     created_at = models.DateTimeField(auto_now_add=True)
