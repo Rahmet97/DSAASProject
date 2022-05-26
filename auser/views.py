@@ -26,6 +26,7 @@ User = get_user_model()
 class InviteUserEmailView(CreateAPIView):
     serializer_class = InviteUserEmailSerializer
     permission_classes = [InviteUserEmailPermission]
+    authentication_classes = [authentication.JWTAuthentication]
 
     def perform_create(self, serializer):
         req_user = self.request.user
@@ -86,7 +87,8 @@ class RegisterView(CreateAPIView):
 
 # User First Login view
 class UserFirstLoginView(views.APIView):
-    permission_classes = (permissions.IsAuthenticated,)
+    authentication_classes = [authentication.JWTAuthentication]
+    permission_classes = [permissions.IsAuthenticated]
 
     def post(self, request, *args, **kwargs):
         if request.user.is_first_login:
