@@ -1,4 +1,3 @@
-from webbrowser import GenericBrowser
 from django.shortcuts import get_object_or_404
 from rest_framework import viewsets, generics, response, status
 from rest_framework.permissions import BasePermission, IsAuthenticated
@@ -48,9 +47,9 @@ class ChangeStatusTaskView(generics.GenericAPIView):
     authentication_classes = [authentication.JWTAuthentication]
     permission_classes = [IsAuthenticated, TaskPermission]
 
-    def put(self, request, id):
-        task = get_object_or_404(Task, pk=id)
-        serializers = self.get_serializer(task)
+    def put(self, request, pk):
+        task = get_object_or_404(Task, pk=pk)
+        serializers = self.get_serializer(task, request.data)
         serializers.is_valid(raise_exception=True)
         serializers.save()
         return response.Response(status=200)

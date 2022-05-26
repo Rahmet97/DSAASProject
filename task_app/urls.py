@@ -5,11 +5,10 @@ from task_app.views import TaskView, NoteView, NoteDestroyAPIView, ChangeStatusT
 router = routers.DefaultRouter()
 router.register(r"task", TaskView, basename="task")
 
-
 urlpatterns = [
     path('note/', NoteView.as_view(), name='note'),
-    path('note/delete/<int:pk>', NoteDestroyAPIView.as_view(), name='note-delete'),
-    path('task/status/<int:pk>', ChangeStatusTaskView.as_view(), name='change-status-task'),
+    path('note/delete/<int:pk>/', NoteDestroyAPIView.as_view(), name='note-delete'),
+    path('task/status/<int:pk>/', ChangeStatusTaskView.as_view(), name='change-status-task'),
 ]
 
 urlpatterns += router.urls
