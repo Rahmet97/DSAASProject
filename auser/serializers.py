@@ -27,7 +27,7 @@ class RegisterCustomSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = UserModel
-        fields = ["first_name", "last_name", "email", "phone_number", "type", "password1", "password2"]
+        fields = ["first_name", "last_name", "email", "phone_number", "role", "password1", "password2"]
 
     def validate_email(self, email):
         if UserModel.objects.filter(email=email).exists():
@@ -54,7 +54,7 @@ class RegisterCustomSerializer(serializers.ModelSerializer):
             'password1': self.validated_data.get('password1', ''),
             'email': self.validated_data.get('email', ''),
             'phone_number': self.validated_data.get('phone_number', ''),
-            'type': self.validated_data.get('type', ''),
+            'role': self.validated_data.get('role', ''),
         }
 
     def save(self, **kwargs):
@@ -89,10 +89,10 @@ class UserCustomDetailsSerializer(serializers.ModelSerializer):
             extra_fields.append('first_name')
         if hasattr(UserModel, 'last_name'):
             extra_fields.append('last_name')
-        if hasattr(UserModel, 'type'):
-            extra_fields.append('type')
+        if hasattr(UserModel, 'role'):
+            extra_fields.append('role')
 
-        fields = ('pk', *extra_fields)
+        fields = ('pk', *extra_fields, 'user_type')
         read_only_fields = ('email',)
 
 
