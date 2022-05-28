@@ -5,8 +5,9 @@ from django.utils.http import urlsafe_base64_decode
 from django.views.decorators.csrf import csrf_exempt
 from django.views.generic import TemplateView
 from drf_yasg.utils import swagger_auto_schema
+from requests import Response
 from rest_framework import status, permissions, response, views
-from rest_framework.generics import CreateAPIView, get_object_or_404, GenericAPIView
+from rest_framework.generics import ListCreateAPIView,CreateAPIView, get_object_or_404, GenericAPIView
 from rest_framework.parsers import MultiPartParser
 from rest_framework_simplejwt import exceptions, authentication, tokens
 
@@ -23,7 +24,7 @@ User = get_user_model()
 
 
 # Invite User Email View
-class InviteUserEmailView(CreateAPIView):
+class InviteUserEmailView(ListCreateAPIView):
     serializer_class = InviteUserEmailSerializer
     permission_classes = [InviteUserEmailPermission]
     authentication_classes = [authentication.JWTAuthentication]
@@ -36,6 +37,10 @@ class InviteUserEmailView(CreateAPIView):
             boss = req_user
         serializer.save(whose_employee_worker=boss)
 
+    def get(self, request, *args, **kwargs):
+        queryset = InviteUserEmail.objects.filter(is_active=False)
+        serializer = self.get_serializer(queryset, many=True)
+        return response.Response(serializer.data)
 
 # Register view
 class RegisterView(CreateAPIView):

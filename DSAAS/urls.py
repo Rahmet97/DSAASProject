@@ -13,6 +13,7 @@ urlpatterns = [
     path('telegram/', include("telegram.urls")),
     path('instagram/', include("instagram.urls")),
     path('ly/', include("urlShort.urls")),
+    path('ads/', include("ads_list.urls")),
 ]
 
 urlpatterns += doc_urls
