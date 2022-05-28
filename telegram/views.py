@@ -6,6 +6,7 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework_simplejwt.authentication import JWTAuthentication
 
+from django.conf import settings
 from .models import Post, TGChannel
 
 
@@ -14,7 +15,7 @@ from .models import Post, TGChannel
 def get_chat_subscribers_count(request):
     link = request.GET.get('link')
     username = '@' + link.split('/')[len(link.split('/'))-1]
-    url = 'https://api.telegram.org/bot'+TOKEN+'/getChatMemberCount'
+    url = 'https://api.telegram.org/bot'+settings.BOT_TOKEN+'/getChatMemberCount'
     count = requests.get(url=url, params={'chat_id': username})
     return Response(count.json())
 

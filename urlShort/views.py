@@ -21,11 +21,9 @@ class UrlShortView(generics.GenericAPIView):
         else:
             boss = request.user
 
-        serializer.save(director_user=boss)
-
         serializer.is_valid(raise_exception=True)
         slug = ''.join(random.choice(string.ascii_letters) for _ in range(10))
-        serializer.save(slug=slug)
+        serializer.save(slug=slug, director_user=boss)
         return response.Response(data={"message": "successfully shorted link"}, status=status.HTTP_200_OK)
 
 

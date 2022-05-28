@@ -9,11 +9,11 @@ User = get_user_model()
 
 class ADS_list(models.Model):
     name = models.CharField(max_length=255)
-    ssilka = models.ForeignKey(UrlShort, on_delete=models.SET_NULL, null=True)
+    link = models.ForeignKey(UrlShort, on_delete=models.CASCADE)
     type = models.CharField(max_length=255)
-    vid = models.CharField(max_length=255)
-    subscribe = models.IntegerField()
-    oxvat = models.FloatField()
+    subscribes = models.FloatField()
+    coverage = models.FloatField()
+    view = models.FloatField()
     cost = models.FloatField()
 
     class Meta:

@@ -48,3 +48,16 @@ class Posts(models.Model):
 
     def __str__(self):
         return str(self.date)
+
+
+class AccessToken(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    access_token = models.CharField(max_length=255)
+    expire = models.IntegerField()
+
+    class Meta:
+        verbose_name = "Access token for Instagram"
+        verbose_name_plural = "Instagram Access Tokens"
+
+    def __str__(self):
+        return self.user.first_name + " " + self.user.last_name

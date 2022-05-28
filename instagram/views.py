@@ -1,10 +1,12 @@
 import requests
-from django.shortcuts import render
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
+from rest_framework.generics import CreateAPIView
+from rest_framework_simplejwt.authentication import JWTAuthentication
 
-TOKEN = ""
+from .models import AccessToken
+from .serializers import AccessTokenSerializer
 
 
 @api_view(['GET'])
@@ -16,3 +18,20 @@ def get_followers(request):
     count = requests.get(url=url, params={'chat_id': username})
     return Response(count.json())
 
+
+class AccessTokenView(CreateAPIView):
+    authentication_classes = (JWTAuthentication,)
+    permission_classes = (IsAuthenticated,)
+    serializer_class = AccessTokenSerializer
+
+    def post(self, request, *args, **kwargs):
+        request.data["user"] = request.user.id
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        access_token = AccessToken(serializer.data)
+        access_token.save()
+        data = {
+            "success": True,
+            "message": "Successfully"
+        }
+        return Response(data)
