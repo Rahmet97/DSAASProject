@@ -23,7 +23,7 @@ class User(AbstractBaseUser):
     phone_number = models.CharField(max_length=255, unique=True)
     first_name = models.CharField(max_length=255)
     last_name = models.CharField(max_length=255)
-    type = models.ForeignKey(to=UserRole, on_delete=models.SET_NULL, null=True, blank=True)
+    role = models.ForeignKey(to=UserRole, on_delete=models.SET_NULL, null=True, blank=True)
     is_first_login = models.BooleanField(default=True)
     is_admin = models.BooleanField(default=False)
     is_company_admin = models.BooleanField(default=False)
@@ -65,6 +65,16 @@ class User(AbstractBaseUser):
         "Is the user a member of staff?"
         # Simplest possible answer: All admins are staff
         return self.is_admin
+
+    @property
+    def user_type(self):
+        if self.is_company_admin:
+            if self.role == None:
+                return "moderator"
+            return "admin"
+        if self.role == None:
+            return "moderator"
+        return "user"
 
     @property
     def full_name(self):

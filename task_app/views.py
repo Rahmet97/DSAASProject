@@ -45,7 +45,7 @@ class ChangeStatusTaskView(generics.GenericAPIView):
     serializer_class = TaskStatusSerializer
     queryset = Task.objects.all()
     authentication_classes = [authentication.JWTAuthentication]
-    permission_classes = [IsAuthenticated, TaskPermission]
+    permission_classes = [IsAuthenticated]
 
     def put(self, request, pk):
         task = get_object_or_404(Task, pk=pk)
