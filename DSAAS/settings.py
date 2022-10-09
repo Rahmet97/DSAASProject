@@ -24,7 +24,7 @@ SECRET_KEY = 'django-insecure-1z40b0tq+)bxp5^s0w7+0)9d)km(@f9@r-12zjr#y0wf&f=7zl
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['*']
+ALLOWED_HOSTS = ['104.248.62.239', 'localhost']
 CORS_ORIGIN_ALLOW_ALL = True
 CORS_ALLOW_CREDENTIALS = True
 
@@ -193,8 +193,12 @@ WSGI_APPLICATION = 'DSAAS.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'ENGINE': 'django.db.backends.postgresql_psycopg2',
+        'NAME': 'DigitalSAAS_DB',
+        'USER': 'dsaas_admin',
+        'PASSWORD': 'Digital2022SAAS',
+        'HOST': 'localhost',
+        'PORT': '',
     }
 }
 

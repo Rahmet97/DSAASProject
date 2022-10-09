@@ -6,4 +6,4 @@ from instagram.models import AccessToken
 class AccessTokenSerializer(serializers.ModelSerializer):
     class Meta:
         model = AccessToken
-        fields = '__all__'
+        fields = ['access_token', 'expire']

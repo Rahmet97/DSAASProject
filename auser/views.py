@@ -238,6 +238,7 @@ class GetOnlineUsersView(views.APIView):
 class DashboardPartTwoView(GenericAPIView):
     authentication_classes = [authentication.JWTAuthentication]
     permission_classes = [permissions.IsAuthenticated]
+    serializer_class = DashboardPartSerializer
 
     def get(self, request):
 
@@ -254,7 +255,7 @@ class DashboardPartTwoView(GenericAPIView):
         for user in users:
             if user.type.type in roles:
                 context[user.type.type] += 1
-        serializers = DashboardPartSerializer(tasks, many=True)
+        serializers = self.get_serializer(tasks, many=True)
         data = {
             "employee_roles": context,
             "employee_total": users.count(),

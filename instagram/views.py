@@ -25,10 +25,12 @@ class AccessTokenView(CreateAPIView):
     serializer_class = AccessTokenSerializer
 
     def post(self, request, *args, **kwargs):
-        request.data["user"] = request.user.id
+        request.data["user"] = request.user
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-        access_token = AccessToken(serializer.data)
+        access_token = AccessToken.objects.create(access_token=serializer.data["access_token"],
+                                                  expire=serializer.data["expire"],
+                                                  user=request.user)
         access_token.save()
         data = {
             "success": True,
