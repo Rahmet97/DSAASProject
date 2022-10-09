@@ -196,7 +196,7 @@ DATABASES = {
         'ENGINE': 'django.db.backends.postgresql_psycopg2',
         'NAME': 'DigitalSAAS_DB',
         'USER': 'dsaas_admin',
-        'PASSWORD': 'Digital2022SAAS',
+        'PASSWORD': 'Digital2022SASS',
         'HOST': 'localhost',
         'PORT': '',
     }
