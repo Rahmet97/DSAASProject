@@ -194,7 +194,7 @@ WSGI_APPLICATION = 'DSAAS.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql_psycopg2',
-        'NAME': 'DigitalSAAS_DB',
+        'NAME': 'DigitalSASS_DB',
         'USER': 'dsaas_admin',
         'PASSWORD': 'Digital2022SASS',
         'HOST': 'localhost',
