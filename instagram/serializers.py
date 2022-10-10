@@ -4,6 +4,10 @@ from instagram.models import AccessToken
 
 
 class AccessTokenSerializer(serializers.ModelSerializer):
+
+    def create(self, validated_data):
+        return AccessToken.objects.create(**validated_data)
+
     class Meta:
         model = AccessToken
-        fields = ['access_token', 'expire']
+        fields = ['user', 'access_token', 'expire']

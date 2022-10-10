@@ -11,7 +11,7 @@ urlpatterns = [
     path('user/', include("auser.urls")),
     path('task/', include('task_app.urls')),
     path('telegram/', include("telegram.urls")),
-    path('instagram/', include("instagram.urls")),
+    path('v1/api/instagram/', include("instagram.urls")),
     path('ly/', include("urlShort.urls")),
     path('ads/', include("ads_list.urls")),
 ]
