@@ -39,7 +39,7 @@ INSTALLED_APPS = [
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
-    'whitenoise.runserver_nostatic',
+    'whitenoise',
     'django.contrib.staticfiles',
     'drf_yasg',  # for swagger and redoc
     'django.contrib.sites',
